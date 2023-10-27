@@ -70,7 +70,7 @@ async function getWeatherWithInterval(Coordinats, IntervalHours) {
 function sendMainMenu(chatId) {
   const opts = {
     reply_markup: {
-      keyboard: [["Forecast in Nice"]],
+      keyboard: [[`Forecast in ${CITY_NAME}`]],
       resize_keyboard: true,
     },
   };
@@ -81,14 +81,14 @@ bot.onText(/\/weither/, (msg) => {
 
   const menuKeyboard = {
     reply_markup: {
-      keyboard: [[{ text: "Forecast in Nice" }]],
+      keyboard: [[{ text: `Forecast in ${CITY_NAME}` }]],
     },
   };
 
   bot.sendMessage(chatId, "Choose an option:", menuKeyboard);
 });
 
-bot.onText(/Forecast in Nice/, (msg) => {
+bot.onText(new RegExp(`Forecast in ${CITY_NAME}`), (msg) => {
   const chatId = msg.chat.id;
 
   const submenuKeyboard = {
