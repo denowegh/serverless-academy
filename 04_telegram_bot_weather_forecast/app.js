@@ -76,16 +76,11 @@ function sendMainMenu(chatId) {
   };
   bot.sendMessage(chatId, "Choose an option:", opts);
 }
+
 bot.onText(/\/weither/, (msg) => {
   const chatId = msg.chat.id;
 
-  const menuKeyboard = {
-    reply_markup: {
-      keyboard: [[{ text: `Forecast in ${CITY_NAME}` }]],
-    },
-  };
-
-  bot.sendMessage(chatId, "Choose an option:", menuKeyboard);
+  sendMainMenu(chatId);
 });
 
 bot.onText(new RegExp(`Forecast in ${CITY_NAME}`), (msg) => {
@@ -93,17 +88,25 @@ bot.onText(new RegExp(`Forecast in ${CITY_NAME}`), (msg) => {
 
   const submenuKeyboard = {
     reply_markup: {
+      resize_keyboard: true,
       keyboard: [
         [
           { text: "at intervals of 3 hours" },
           { text: "at intervals of 6 hours" },
         ],
+
+        [{ text: "Back" }],
       ],
-      one_time_keyboard: true,
     },
   };
 
   bot.sendMessage(chatId, "Choose the interval:", submenuKeyboard);
+});
+
+bot.onText(/Back/, (msg) => {
+  const chatId = msg.chat.id;
+
+  sendMainMenu(chatId);
 });
 
 bot.onText(/at intervals of 3 hours/, async (msg) => {
