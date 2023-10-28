@@ -4,8 +4,7 @@ const FILE_NAME = "users.txt";
 let users = [];
 
 fs.readFile(FILE_NAME, "utf8", (err, data) => {
-  if (err) {
-  } else {
+  if (!err) {
     users = JSON.parse(data);
   }
 });
