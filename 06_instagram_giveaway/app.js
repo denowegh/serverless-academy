@@ -2,17 +2,14 @@ import fs from "fs/promises";
 
 async function uniqueValues() {
   let usernames = new Set();
-  let c = 0;
   await Promise.all(
     Array.from({ length: 20 }, async (_, i) => {
       const data = await fs.readFile(`./data/out${i}.txt`, "utf8");
       data.split("\n").forEach((e) => {
         usernames.add(e);
-        c++;
       });
     })
   );
-  console.log(c);
   return usernames.size;
 }
 
@@ -31,7 +28,7 @@ async function existInAllFiles() {
     usernames.clear();
   }
   let count = 0;
-  for (const [kay, value] of countUsernames) {
+  for (const [_, value] of countUsernames) {
     if (value == 20) {
       count++;
     }
@@ -54,7 +51,7 @@ async function existInAtleastTen() {
     usernames.clear();
   }
   let count = 0;
-  for (const [kay, value] of countUsernames) {
+  for (const [_, value] of countUsernames) {
     if (value >= 10) {
       count++;
     }
