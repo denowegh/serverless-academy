@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 
 async function uniqueValues() {
+  console.time("Elapsed time uniqueValues");
   let usernames = new Set();
   await Promise.all(
     Array.from({ length: 20 }, async (_, i) => {
@@ -10,10 +11,12 @@ async function uniqueValues() {
       });
     })
   );
+  console.timeEnd("Elapsed time uniqueValues");
   return usernames.size;
 }
 
 async function existInAllFiles() {
+  console.time("Elapsed time existInAllFiles");
   let countUsernames = new Map();
   for (let i = 0; i < 20; i++) {
     const data = await fs.readFile(`./data/out${i}.txt`, "utf8");
@@ -29,11 +32,13 @@ async function existInAllFiles() {
       }
     });
   }
-
-  return [...countUsernames].filter(([_, value]) => value == 20).length;
+  let count = [...countUsernames].filter(([_, value]) => value == 20).length;
+  console.timeEnd("Elapsed time existInAllFiles");
+  return count;
 }
 
 async function existInAtleastTen() {
+  console.time("Elapsed time existInAtleastTen");
   let countUsernames = new Map();
   for (let i = 0; i < 20; i++) {
     const data = await fs.readFile(`./data/out${i}.txt`, "utf8");
@@ -44,21 +49,16 @@ async function existInAtleastTen() {
     });
     usernames.clear();
   }
-
-  return [...countUsernames].filter(([_, value]) => value >= 10).length;
+  let count = [...countUsernames].filter(([_, value]) => value >= 10).length;
+  console.timeEnd("Elapsed time existInAtleastTen");
+  return count;
 }
 
 console.time("Elapsed time");
-console.time("Elapsed time uniqueValues");
 let uniqueUsernames = await uniqueValues();
-console.timeEnd("Elapsed time uniqueValues");
-console.log(uniqueUsernames);
-console.time("Elapsed time existInAllFiles");
 let usernamesExistInAllFiles = await existInAllFiles();
-console.timeEnd("Elapsed time existInAllFiles");
-console.log(usernamesExistInAllFiles);
-console.time("Elapsed time existInAtleastTen");
 let usernamesexistInAtleastTen = await existInAtleastTen();
-console.timeEnd("Elapsed time existInAtleastTen");
-console.log(usernamesexistInAtleastTen);
 console.timeEnd("Elapsed time");
+console.log(uniqueUsernames);
+console.log(usernamesExistInAllFiles);
+console.log(usernamesexistInAtleastTen);
