@@ -12,7 +12,7 @@ async function uniqueValues() {
     })
   );
   console.timeEnd("Elapsed time uniqueValues");
-  return usernames.size;
+  console.log(usernames.size);
 }
 
 async function existInAllFiles() {
@@ -34,7 +34,7 @@ async function existInAllFiles() {
   }
   let count = [...countUsernames].filter(([_, value]) => value == 20).length;
   console.timeEnd("Elapsed time existInAllFiles");
-  return count;
+  console.log(count);
 }
 
 async function existInAtleastTen() {
@@ -49,16 +49,13 @@ async function existInAtleastTen() {
     });
     usernames.clear();
   }
-  let count = [...countUsernames].filter(([_, value]) => value >= 10).length;
+  const count = [...countUsernames].filter(([_, value]) => value >= 10).length;
   console.timeEnd("Elapsed time existInAtleastTen");
-  return count;
+  console.log(count);
 }
 
 console.time("Elapsed time");
-let uniqueUsernames = await uniqueValues();
-let usernamesExistInAllFiles = await existInAllFiles();
-let usernamesexistInAtleastTen = await existInAtleastTen();
+await uniqueValues();
+await existInAllFiles();
+await existInAtleastTen();
 console.timeEnd("Elapsed time");
-console.log(uniqueUsernames);
-console.log(usernamesExistInAllFiles);
-console.log(usernamesexistInAtleastTen);
