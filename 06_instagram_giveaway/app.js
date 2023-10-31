@@ -3,14 +3,15 @@ import fs from "fs/promises";
 async function uniqueValues() {
   console.time("Elapsed time uniqueValues");
   let usernames = new Set();
-  await Promise.all(
-    Array.from({ length: 20 }, async (_, i) => {
-      const data = await fs.readFile(`./data/out${i}.txt`, "utf8");
-      data.split("\n").forEach((e) => {
-        usernames.add(e);
-      });
-    })
-  );
+
+  for (let i = 0; i < 20; i++) {
+    const data = await fs.readFile(`./data/out${i}.txt`, "utf8");
+    const lines = data.split("\n");
+
+    for (let j = 0; j < lines.length; j++) {
+      usernames.add(lines[j]);
+    }
+  }
   console.timeEnd("Elapsed time uniqueValues");
   console.log(usernames.size);
 }
@@ -21,16 +22,15 @@ async function existInAllFiles() {
   for (let i = 0; i < 20; i++) {
     const data = await fs.readFile(`./data/out${i}.txt`, "utf8");
     const usernames = new Set(data.split("\n"));
-
-    usernames.forEach((e) => {
+    for (const username of usernames) {
       if (i == 0) {
-        countUsernames.set(e, 1);
+        countUsernames.set(username, 1);
       } else {
-        if (countUsernames.has(e)) {
-          countUsernames.set(e, countUsernames.get(e) + 1);
+        if (countUsernames.has(username)) {
+          countUsernames.set(username, countUsernames.get(username) + 1);
         }
       }
-    });
+    }
   }
   let count = [...countUsernames].filter(([_, value]) => value == 20).length;
   console.timeEnd("Elapsed time existInAllFiles");
@@ -43,13 +43,12 @@ async function existInAtleastTen() {
   for (let i = 0; i < 20; i++) {
     const data = await fs.readFile(`./data/out${i}.txt`, "utf8");
     const usernames = new Set(data.split("\n"));
-
-    usernames.forEach((e) => {
-      countUsernames.set(e, (countUsernames.get(e) || 0) + 1);
-    });
-    usernames.clear();
+    for (const username of usernames) {
+      countUsernames.set(username, (countUsernames.get(username) || 0) + 1);
+    }
   }
-  const count = [...countUsernames].filter(([_, value]) => value >= 10).length;
+
+  let count = [...countUsernames].filter(([_, value]) => value >= 10).length;
   console.timeEnd("Elapsed time existInAtleastTen");
   console.log(count);
 }
