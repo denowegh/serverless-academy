@@ -29,7 +29,7 @@ function findProperty(obj) {
   if (match && match[1] !== undefined) {
     var valueStr = match[1];
     var result = JSON.parse(valueStr);
-    return Boolean(result);
+    return result;
   }
 
   return undefined;
