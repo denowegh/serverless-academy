@@ -9,10 +9,9 @@ const CITY_NAME = process.env.CITY_NAME;
 const bot = new TelegramBot(TOKEN, { polling: true });
 
 async function getCoordinates() {
+  const LINK = `http://api.openweathermap.org/geo/1.0/direct?q=${CITY_NAME}&limit=1&appid=${API_KEY_WEATHER}`;
   try {
-    const response = await axios.get(
-      `http://api.openweathermap.org/geo/1.0/direct?q=${CITY_NAME}&limit=1&appid=${API_KEY_WEATHER}`
-    );
+    const response = await axios.get(LINK);
     const results = response.data[0];
     if (results) {
       const latitude = results.lat;
@@ -29,42 +28,27 @@ async function getCoordinates() {
   }
 }
 
-async function getWeatherWithInterval(Coordinats, IntervalHours) {
-  if (Coordinats) {
-    try {
-      const response = await axios.get(
-        `https://api.openweathermap.org/data/2.5/forecast?lat=${Coordinats[0]}&lon=${Coordinats[1]}&exclude=daily&appid=${API_KEY_WEATHER}&units=metric`
-      );
-      const weatherData = response.data.list;
+async function getWeather(Coordinats) {
+  const LINK = `https://api.openweathermap.org/data/2.5/weather?lat=${Coordinats[0]}&lon=${Coordinats[1]}&appid=${API_KEY_WEATHER}&units=metric`;
+  const response = await axios.get(LINK);
+  const {
+    name,
+    sys: { country },
+    main: { temp, feels_like, humidity },
+    weather: [{ description }],
+    dt,
+  } = response.data;
+  const dateTime = new Date(dt * 1000);
+  const date = dateTime.toLocaleDateString();
+  const time = dateTime.toLocaleTimeString();
 
-      const dailyWeather = {};
-      for (let id = 0; id < weatherData.length; id += IntervalHours / 3) {
-        const data = weatherData[id];
-        const dateTime = new Date(data.dt * 1000);
-        const date = dateTime.toLocaleDateString();
-        const time = dateTime.toLocaleTimeString();
-
-        const temperature = data.main.temp;
-        const feelsLike = data.main.feels_like;
-        const humidity = data.main.humidity;
-        const weatherDescription = data.weather[0].description;
-
-        const dailyInfo = `Date: ${date}\nTime: ${time}\nTemperature: ${temperature}°C\nIt feels like: ${feelsLike}°C\nHumidity: ${humidity}%\nWeather condition: ${weatherDescription}\n`;
-
-        if (!dailyWeather[date]) {
-          dailyWeather[date] = dailyInfo;
-        } else {
-          dailyWeather[date] += `\n\n${dailyInfo}`;
-        }
-      }
-
-      return dailyWeather;
-    } catch (error) {
-      console.error("Error get weather:", error);
-    }
-  } else {
-    console.error("Error");
-  }
+  return `Location: ${name}, ${country}
+Date: ${date}
+Time: ${time}
+Temperature: ${temp.toFixed(2)}°C
+It feels like: ${feels_like.toFixed(2)}°C
+Humidity: ${humidity}%
+Weather condition: ${description}`;
 }
 
 function sendMainMenu(chatId) {
@@ -109,24 +93,36 @@ bot.onText(/Back/, (msg) => {
   sendMainMenu(chatId);
 });
 
+let intervalId;
+
+async function sendMessageWeather(chatId) {
+  const coordinats = await getCoordinates();
+  const weather = await getWeather(coordinats);
+  bot.sendMessage(chatId, `Weather:\n ${weather}`);
+}
+
 bot.onText(/at intervals of 3 hours/, async (msg) => {
   const chatId = msg.chat.id;
 
-  let coordinats = await getCoordinates();
-  let weather = await getWeatherWithInterval(coordinats, 3);
-  for (const date in weather) {
-    bot.sendMessage(chatId, `Weather on ${date}:\n${weather[date]}\n\n`);
-  }
+  clearInterval(intervalId);
+
+  sendMessageWeather(chatId);
+
+  intervalId = setInterval(async () => {
+    sendMessageWeather(chatId);
+  }, 3 * 60 * 60 * 1000); //3 hours
 });
 
 bot.onText(/at intervals of 6 hours/, async (msg) => {
   const chatId = msg.chat.id;
-  let coordinats = await getCoordinates();
-  let weather = await getWeatherWithInterval(coordinats, 6);
-  for (const date in weather) {
-    if (weather[date])
-      bot.sendMessage(chatId, `Weather on ${date}:\n${weather[date]}\n\n`);
-  }
+
+  clearInterval(intervalId);
+
+  sendMessageWeather(chatId);
+
+  intervalId = setInterval(async () => {
+    sendMessageWeather(chatId);
+  }, 6 * 60 * 60 * 1000); //6 hours
 });
 
 bot.onText(/\/start/, (msg) => {
